@@ -1,0 +1,478 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Lodge a Complaint{% endblock %}
+
+{% block extra_css %}
+<style>
+.page-hero {
+    background: linear-gradient(135deg, var(--purple-900), var(--purple-700));
+    padding: 120px 2rem 60px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+.page-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 100%, rgba(90,45,158,0.5) 0%, transparent 70%);
+}
+.page-hero-content { position: relative; z-index: 1; }
+.page-hero h1 { color: white; font-size: clamp(1.8rem, 4vw, 2.8rem); margin-bottom: 0.5rem; }
+.page-hero p { color: rgba(255,255,255,0.7); font-size: 1rem; }
+
+.form-section {
+    padding: 60px 2rem;
+    max-width: 860px;
+    margin: 0 auto;
+}
+
+.form-card {
+    background: white;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    border: 1px solid var(--gray-200);
+}
+
+.form-section-header {
+    background: var(--purple-100);
+    border-left: 4px solid var(--purple-600);
+    padding: 12px 20px;
+    margin: 0 -28px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--purple-800);
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.category-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.category-option { display: none; }
+.category-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 16px 12px;
+    border: 2px solid var(--gray-200);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    text-align: center;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--gray-600);
+    transition: var(--transition);
+    background: var(--white);
+}
+
+.category-label:hover {
+    border-color: var(--purple-400);
+    color: var(--purple-700);
+    background: var(--purple-100);
+}
+
+.category-option:checked + .category-label {
+    border-color: var(--purple-600);
+    background: var(--purple-100);
+    color: var(--purple-800);
+    box-shadow: 0 0 0 3px rgba(90,45,158,0.12);
+}
+
+.category-icon { font-size: 1.6rem; }
+
+.notify-options {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.notify-chip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border: 2px solid var(--gray-200);
+    border-radius: 100px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--gray-600);
+    transition: var(--transition);
+}
+
+.notify-chip input { display: none; }
+.notify-chip:has(input:checked) {
+    border-color: var(--purple-600);
+    background: var(--purple-100);
+    color: var(--purple-700);
+}
+.notify-chip:hover { border-color: var(--purple-400); }
+
+.anon-toggle-box {
+    background: linear-gradient(135deg, var(--purple-100), #f5f0ff);
+    border: 2px solid var(--purple-200);
+    border-radius: var(--radius-md);
+    padding: 16px 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.anon-toggle-box:hover { border-color: var(--purple-400); }
+
+.anon-toggle-box input[type="checkbox"] {
+    width: 20px; height: 20px;
+    accent-color: var(--purple-600);
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.anon-title { font-weight: 700; color: var(--purple-800); margin-bottom: 3px; font-size: 0.95rem; }
+.anon-desc { font-size: 0.82rem; color: var(--gray-600); line-height: 1.5; }
+
+.upload-zone {
+    border: 2px dashed var(--gray-200);
+    border-radius: var(--radius-md);
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition);
+    position: relative;
+}
+
+.upload-zone:hover { border-color: var(--purple-400); background: var(--purple-100); }
+.upload-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; }
+.upload-icon { color: var(--purple-400); margin-bottom: 10px; }
+.upload-text { font-size: 0.9rem; color: var(--gray-600); }
+.upload-hint { font-size: 0.75rem; color: var(--gray-400); margin-top: 4px; }
+
+.submit-bar {
+    background: var(--gray-100);
+    padding: 20px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid var(--gray-200);
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.submit-info {
+    font-size: 0.82rem;
+    color: var(--gray-400);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+@media (max-width: 600px) {
+    .form-section { padding: 40px 1rem; }
+    .category-grid { grid-template-columns: repeat(2, 1fr); }
+    .notify-options { flex-direction: column; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-hero">
+    <div class="page-hero-content animate-fadeInUp">
+        <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(212,160,23,0.15);border:1px solid rgba(212,160,23,0.4);color:var(--gold-light);padding:5px 14px;border-radius:100px;font-size:0.75rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:1rem;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+            New Complaint
+        </div>
+        <h1>Lodge a Complaint</h1>
+        <p>Complete the form below. You will receive a unique reference number upon submission.</p>
+    </div>
+</div>
+
+<div class="form-section">
+    <form method="post" enctype="multipart/form-data" id="complaintForm">
+        {% csrf_token %}
+        <div class="form-card">
+            <div style="padding:28px;">
+
+                <!-- Anonymous toggle -->
+                <div class="form-group">
+                    <label class="anon-toggle-box" for="is_anonymous">
+                        <input type="checkbox" id="is_anonymous" name="is_anonymous" onchange="toggleAnonymous(this)">
+                        <div>
+                            <div class="anon-title">Submit Anonymously</div>
+                            <div class="anon-desc">Your personal details will not be stored or shared. Note: anonymous submissions cannot receive direct updates via email or WhatsApp.</div>
+                        </div>
+                    </label>
+                </div>
+
+                <!-- Personal details (hidden if anonymous) -->
+                <div id="personalDetails">
+                    <div class="form-section-header">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        Your Details
+                    </div>
+                    <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+                        <div class="form-group">
+                            <label class="form-label">First Name</label>
+                            <input type="text" name="first_name" class="form-control" placeholder="e.g. Sipho" value="{% if user.is_authenticated %}{{ user.first_name }}{% endif %}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Last Name</label>
+                            <input type="text" name="last_name" class="form-control" placeholder="e.g. Dlamini" value="{% if user.is_authenticated %}{{ user.last_name }}{% endif %}">
+                        </div>
+                    </div>
+                    <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+                        <div class="form-group">
+                            <label class="form-label">Email Address</label>
+                            <input type="email" name="email" class="form-control" placeholder="your@email.com" value="{% if user.is_authenticated %}{{ user.email }}{% endif %}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Phone / WhatsApp</label>
+                            <input type="tel" name="phone" class="form-control" placeholder="+27 82 000 0000">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Category selection -->
+                <div class="form-section-header">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h7"/></svg>
+                    Issue Category
+                </div>
+                <div class="category-grid">
+                    {% for value, label in categories %}
+                    <div>
+                        <input type="radio" name="category" id="cat_{{ value }}" value="{{ value }}" class="category-option" {% if forloop.first %}checked{% endif %}>
+                        <label for="cat_{{ value }}" class="category-label">
+                            <span class="category-icon">
+                                {% if value == 'water' %}💧
+                                {% elif value == 'electricity' %}⚡
+                                {% elif value == 'roads' %}🛣️
+                                {% elif value == 'waste' %}🗑️
+                                {% elif value == 'housing' %}🏠
+                                {% elif value == 'parks' %}🌳
+                                {% elif value == 'safety' %}🚨
+                                {% else %}📋{% endif %}
+                            </span>
+                            {{ label }}
+                        </label>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Complaint details -->
+                <div class="form-section-header" style="margin-top:1.5rem;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                    Complaint Details
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Brief Title <span style="color:var(--error);">*</span></label>
+                    <input type="text" name="title" class="form-control" placeholder="e.g. Large pothole on Main Street damaging vehicles" required maxlength="200">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Full Description <span style="color:var(--error);">*</span></label>
+                    <textarea name="description" class="form-control" rows="5" placeholder="Describe the issue in detail. Include when it started, how it affects you, and any other relevant information..." required></textarea>
+                </div>
+                <div style="display:grid;grid-template-columns:2fr 1fr;gap:1rem;">
+                    <div class="form-group">
+                        <label class="form-label">Street Address / Location <span style="color:var(--error);">*</span></label>
+                        <input type="text" name="location_address" class="form-control" placeholder="e.g. 42 Berea Road, Durban, 4001" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Ward Number</label>
+                        <input type="text" name="ward_number" class="form-control" placeholder="e.g. 31">
+                    </div>
+                </div>
+
+                <!-- Photo upload -->
+                <div class="form-section-header">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                    Attach a Photo (Optional)
+                </div>
+                <div class="upload-zone" id="uploadZone">
+                    <input type="file" name="photo" accept="image/*" onchange="previewPhoto(this)">
+                    <div class="upload-icon">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                    </div>
+                    <p class="upload-text">Click to upload or drag and drop a photo</p>
+                    <p class="upload-hint">Supported formats: JPG, PNG, WEBP — Max 5MB</p>
+                    <div id="photoPreview" style="margin-top:1rem; display:none;">
+                        <img id="previewImg" style="max-height:160px;border-radius:8px;box-shadow:var(--shadow-sm);">
+                        <p id="previewName" style="font-size:0.8rem;color:var(--gray-400);margin-top:6px;"></p>
+                    </div>
+                </div>
+
+                <!-- Notification preferences -->
+                <div class="form-section-header" style="margin-top:1.5rem;" id="notifySection">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                    How Would You Like Updates?
+                </div>
+                <div class="notify-options" id="notifyOptions">
+                    <label class="notify-chip">
+                        <input type="checkbox" name="notify_email" checked>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                        Email Notifications
+                    </label>
+                    <label class="notify-chip">
+                        <input type="checkbox" name="notify_whatsapp">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                        WhatsApp Updates
+                    </label>
+                    <label class="notify-chip">
+                        <input type="checkbox" name="notify_sms">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.6 3.38 2 2 0 0 1 3.58 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.96a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 15.92z"/></svg>
+                        SMS Alerts
+                    </label>
+                </div>
+
+            </div><!-- end padding div -->
+
+            <div class="submit-bar">
+                <p class="submit-info">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    Your information is protected under POPIA. Complaints are submitted securely.
+                </p>
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    Submit Complaint
+                </button>
+            </div>
+
+        </div><!-- end form-card -->
+    </form>
+</div>
+
+<!-- CHATBOX -->
+<div class="chatbox-fab">
+    <div style="position:relative;">
+        <button class="chatbox-toggle" id="chatToggle" onclick="toggleChat()">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </button>
+        <span class="chat-badge">?</span>
+    </div>
+    <div class="chatbox-panel" id="chatPanel">
+        <div class="chat-header">
+            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=SupportAgent&backgroundColor=b6e3f4" class="chat-agent-avatar" alt="Support Agent">
+            <div class="chat-agent-info">
+                <div class="chat-agent-name">Support Agent</div>
+                <div class="chat-agent-status"><span class="status-dot"></span> Available 24/7</div>
+            </div>
+            <button class="chat-close" onclick="toggleChat()">&#x2715;</button>
+        </div>
+        <div class="chat-messages" id="chatMessages">
+            <div class="chat-message staff-msg">
+                <div class="msg-bubble">Hi there! Need help filling in this form? I can answer any questions about the complaint process.</div>
+                <span class="msg-meta">Support Agent · now</span>
+            </div>
+        </div>
+        <div class="chat-input-area">
+            <textarea class="chat-input" id="chatInput" placeholder="Type your question..." rows="1" onkeydown="handleChatKey(event)"></textarea>
+            <button class="chat-send" onclick="sendChatMessage()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function toggleAnonymous(cb) {
+    const details = document.getElementById('personalDetails');
+    const notifySection = document.getElementById('notifySection');
+    const notifyOptions = document.getElementById('notifyOptions');
+    if (cb.checked) {
+        details.style.display = 'none';
+        notifySection.style.display = 'none';
+        notifyOptions.style.display = 'none';
+    } else {
+        details.style.display = 'block';
+        notifySection.style.display = 'flex';
+        notifyOptions.style.display = 'flex';
+    }
+}
+
+function previewPhoto(input) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('previewImg').src = e.target.result;
+            document.getElementById('previewName').textContent = input.files[0].name;
+            document.getElementById('photoPreview').style.display = 'block';
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+function toggleChat() {
+    const panel = document.getElementById('chatPanel');
+    panel.classList.toggle('open');
+    if (panel.classList.contains('open')) loadChatMessages();
+}
+
+function handleChatKey(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendChatMessage();
+    }
+}
+
+function sendChatMessage() {
+    const input = document.getElementById('chatInput');
+    const msg = input.value.trim();
+    if (!msg) return;
+    input.value = '';
+    appendMessage('You', msg, false);
+
+    fetch('/report/api/chat/', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken')},
+        body: JSON.stringify({message: msg, page: 'lodge'})
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.messages) {
+            const last = data.messages[data.messages.length - 1];
+            if (last && last.is_staff) appendMessage(last.name, last.message, true);
+        }
+    });
+}
+
+function appendMessage(name, text, isStaff) {
+    const container = document.getElementById('chatMessages');
+    const div = document.createElement('div');
+    div.className = 'chat-message ' + (isStaff ? 'staff-msg' : 'user-msg');
+    div.innerHTML = `<div class="msg-bubble">${text}</div><span class="msg-meta">${name} · now</span>`;
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+}
+
+function loadChatMessages() {
+    fetch('/report/api/chat/?page=lodge')
+    .then(r => r.json())
+    .then(data => {
+        const container = document.getElementById('chatMessages');
+        container.innerHTML = '';
+        if (!data.messages || data.messages.length === 0) {
+            appendMessage('Support Agent', 'Hi there! Need help filling in this form? I can answer any questions about the complaint process.', true);
+        } else {
+            data.messages.forEach(m => appendMessage(m.name, m.message, m.is_staff));
+        }
+    });
+}
+
+function getCookie(name) {
+    let v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+    return v ? v[2] : null;
+}
+</script>
+{% endblock %}

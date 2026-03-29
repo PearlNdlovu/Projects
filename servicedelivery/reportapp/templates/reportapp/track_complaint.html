@@ -1,0 +1,537 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Track Your Complaint{% endblock %}
+
+{% block extra_css %}
+<style>
+.page-hero {
+    background: linear-gradient(135deg, var(--purple-900), var(--purple-700));
+    padding: 120px 2rem 60px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+.page-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 100%, rgba(90,45,158,0.5) 0%, transparent 70%);
+}
+.page-hero-content { position: relative; z-index: 1; }
+.page-hero h1 { color: white; font-size: clamp(1.8rem, 4vw, 2.8rem); margin-bottom: 0.5rem; }
+.page-hero p { color: rgba(255,255,255,0.7); }
+
+.track-page { padding: 60px 2rem; max-width: 900px; margin: 0 auto; }
+
+/* Search box */
+.search-card {
+    background: white;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-md);
+    padding: 36px;
+    margin-bottom: 2rem;
+    border: 1px solid var(--gray-200);
+}
+.search-title { font-family: 'Playfair Display', serif; font-size: 1.3rem; color: var(--purple-900); margin-bottom: 0.3rem; }
+.search-sub { font-size: 0.875rem; color: var(--gray-400); margin-bottom: 1.5rem; }
+.search-row { display: flex; gap: 1rem; }
+.search-row .form-control { flex: 1; font-size: 1rem; text-transform: uppercase; letter-spacing: 1px; }
+
+/* Result card */
+.result-card {
+    background: white;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+    border: 1px solid var(--gray-200);
+    animation: fadeInUp 0.5s ease both;
+    margin-bottom: 2rem;
+}
+.result-header {
+    background: linear-gradient(135deg, var(--purple-900), var(--purple-700));
+    padding: 28px 32px;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+.result-ref { font-family: 'Courier New', monospace; font-size: 1.3rem; font-weight: 700; letter-spacing: 2px; color: var(--gold-light); }
+.result-title { font-family: 'Playfair Display', serif; font-size: 1.4rem; margin: 6px 0; }
+.result-meta { font-size: 0.8rem; color: rgba(255,255,255,0.6); display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 4px; }
+
+.status-pill {
+    padding: 6px 16px;
+    border-radius: 100px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    border: 2px solid rgba(255,255,255,0.3);
+    color: white;
+    white-space: nowrap;
+}
+
+.result-body { padding: 32px; }
+
+/* Status tracker */
+.tracker-wrapper {
+    background: var(--gray-100);
+    border-radius: var(--radius-md);
+    padding: 24px 16px;
+    margin-bottom: 2rem;
+}
+.tracker-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--gray-400);
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+/* Update timeline */
+.timeline-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    color: var(--purple-900);
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--gray-200);
+}
+.timeline { position: relative; padding-left: 28px; }
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 9px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--purple-600), var(--gray-200));
+}
+.timeline-item {
+    position: relative;
+    padding-bottom: 1.5rem;
+}
+.timeline-dot {
+    position: absolute;
+    left: -24px;
+    top: 4px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--purple-600);
+    border: 3px solid white;
+    box-shadow: 0 0 0 2px var(--purple-600);
+}
+.timeline-item:last-child .timeline-dot { background: var(--purple-300); }
+.timeline-time { font-size: 0.72rem; color: var(--gray-400); margin-bottom: 3px; font-weight: 600; }
+.timeline-msg { font-size: 0.875rem; color: var(--gray-800); line-height: 1.5; }
+.timeline-by { font-size: 0.75rem; color: var(--purple-500); margin-top: 3px; }
+
+/* Contact options */
+.contact-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+.contact-option {
+    background: var(--white);
+    border: 2px solid var(--gray-200);
+    border-radius: var(--radius-md);
+    padding: 20px 16px;
+    text-align: center;
+    transition: var(--transition);
+    text-decoration: none;
+    color: var(--gray-800);
+}
+.contact-option:hover {
+    border-color: var(--purple-400);
+    background: var(--purple-100);
+    color: var(--purple-800);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+}
+.contact-icon {
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    background: var(--purple-100);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 10px;
+    color: var(--purple-600);
+}
+.contact-label { font-weight: 700; font-size: 0.875rem; }
+.contact-sub { font-size: 0.75rem; color: var(--gray-400); margin-top: 2px; }
+
+/* Rating section */
+.rating-section {
+    background: linear-gradient(135deg, var(--purple-100), #f5f0ff);
+    border: 2px solid var(--purple-200);
+    border-radius: var(--radius-lg);
+    padding: 28px;
+    margin-bottom: 2rem;
+}
+.rating-title { font-family: 'Playfair Display', serif; font-size: 1.2rem; color: var(--purple-900); margin-bottom: 0.3rem; }
+.rating-sub { font-size: 0.875rem; color: var(--gray-600); margin-bottom: 1.5rem; }
+
+/* Info cards */
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+.info-item {
+    background: var(--gray-100);
+    border-radius: var(--radius-md);
+    padding: 16px;
+}
+.info-label { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--gray-400); margin-bottom: 4px; }
+.info-value { font-size: 0.95rem; color: var(--gray-800); font-weight: 600; }
+
+/* Error state */
+.error-card {
+    background: var(--error-light);
+    border: 2px solid #f5b8b2;
+    border-radius: var(--radius-md);
+    padding: 20px 24px;
+    color: var(--error);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 2rem;
+    animation: fadeInUp 0.4s ease both;
+}
+
+@media (max-width: 600px) {
+    .contact-grid { grid-template-columns: 1fr; }
+    .info-grid { grid-template-columns: 1fr; }
+    .search-row { flex-direction: column; }
+    .result-header { flex-direction: column; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-hero">
+    <div class="page-hero-content animate-fadeInUp">
+        <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(212,160,23,0.15);border:1px solid rgba(212,160,23,0.4);color:var(--gold-light);padding:5px 14px;border-radius:100px;font-size:0.75rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:1rem;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Live Status Tracking
+        </div>
+        <h1>Track Your Complaint</h1>
+        <p>Enter your reference number to check the real-time status of your complaint.</p>
+    </div>
+</div>
+
+<div class="track-page">
+    <!-- Search -->
+    <div class="search-card animate-fadeInUp">
+        <h2 class="search-title">Find Your Complaint</h2>
+        <p class="search-sub">Your reference number was shown after submission and sent to your email (e.g. SD-2024-ABC123).</p>
+        <form method="post" action="{% url 'track_complaint' %}">
+            {% csrf_token %}
+            <div class="search-row">
+                <input type="text" name="reference_number" class="form-control" placeholder="Enter reference number (e.g. SD-2024-ABC123)"
+                    value="{% if complaint %}{{ complaint.reference_number }}{% endif %}" autocomplete="off" style="text-transform:uppercase;">
+                <button type="submit" class="btn btn-primary" style="white-space:nowrap;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    Search
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Error -->
+    {% if error %}
+    <div class="error-card">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <div>
+            <strong>Not Found</strong><br>
+            <span style="font-size:0.875rem;">{{ error }}</span>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Result -->
+    {% if complaint %}
+    <div class="result-card">
+        <div class="result-header">
+            <div>
+                <p class="result-ref">{{ complaint.reference_number }}</p>
+                <h2 class="result-title">{{ complaint.title }}</h2>
+                <div class="result-meta">
+                    <span>{{ complaint.get_category_display }}</span>
+                    <span>|</span>
+                    <span>{{ complaint.location_address }}</span>
+                    <span>|</span>
+                    <span>Submitted {{ complaint.created_at|date:"d M Y" }}</span>
+                </div>
+            </div>
+            <span class="status-pill">{{ complaint.get_status_display }}</span>
+        </div>
+
+        <div class="result-body">
+            <!-- Status Tracker Circles -->
+            <div class="tracker-wrapper">
+                <p class="tracker-title">Complaint Progress</p>
+                <div class="status-tracker">
+                    {% with status=complaint.status %}
+                    <div class="tracker-step {% if status in 'pending,submitted,in_progress,resolved,closed' %}completed{% endif %} {% if status == 'pending' %}active{% endif %}">
+                        <div class="tracker-circle">
+                            {% if status != 'pending' %}<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                            {% else %}1{% endif %}
+                        </div>
+                        <span class="tracker-label">Pending</span>
+                    </div>
+                    <div class="tracker-step {% if status in 'submitted,in_progress,resolved,closed' %}completed{% endif %} {% if status == 'submitted' %}active{% endif %}">
+                        <div class="tracker-circle">
+                            {% if status in 'in_progress,resolved,closed' %}<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                            {% else %}2{% endif %}
+                        </div>
+                        <span class="tracker-label">Submitted</span>
+                    </div>
+                    <div class="tracker-step {% if status in 'in_progress,resolved,closed' %}completed{% endif %} {% if status == 'in_progress' %}active{% endif %}">
+                        <div class="tracker-circle">
+                            {% if status in 'resolved,closed' %}<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                            {% else %}3{% endif %}
+                        </div>
+                        <span class="tracker-label">In Progress</span>
+                    </div>
+                    <div class="tracker-step {% if status in 'resolved,closed' %}completed{% endif %} {% if status == 'resolved' %}active{% endif %}">
+                        <div class="tracker-circle">
+                            {% if status == 'closed' %}<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                            {% else %}4{% endif %}
+                        </div>
+                        <span class="tracker-label">Resolved</span>
+                    </div>
+                    <div class="tracker-step {% if status == 'closed' %}completed active{% endif %}">
+                        <div class="tracker-circle">5</div>
+                        <span class="tracker-label">Closed</span>
+                    </div>
+                    {% endwith %}
+                </div>
+                <p style="text-align:center; font-size:0.8rem; color:var(--gray-400); margin-top:1rem;">
+                    Approximately <strong>{{ complaint.get_status_percentage }}%</strong> complete
+                </p>
+            </div>
+
+            <!-- Complaint info -->
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">Category</div>
+                    <div class="info-value">{{ complaint.get_category_display }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Priority</div>
+                    <div class="info-value">{{ complaint.get_priority_display }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Date Submitted</div>
+                    <div class="info-value">{{ complaint.created_at|date:"d M Y, H:i" }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Last Updated</div>
+                    <div class="info-value">{{ complaint.updated_at|date:"d M Y, H:i" }}</div>
+                </div>
+            </div>
+
+            <div style="background:var(--gray-100);border-radius:var(--radius-md);padding:16px;margin-bottom:1.5rem;">
+                <div class="info-label" style="margin-bottom:6px;">Description</div>
+                <p style="font-size:0.9rem; color:var(--gray-800); line-height:1.6;">{{ complaint.description }}</p>
+            </div>
+
+            <!-- Timeline -->
+            {% if complaint.updates.all %}
+            <h3 class="timeline-title">Update History</h3>
+            <div class="timeline" style="margin-bottom:2rem;">
+                {% for update in complaint.updates.all %}
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-time">{{ update.timestamp|date:"d M Y, H:i" }}</div>
+                    <div class="timeline-msg">{{ update.message }}</div>
+                    <div class="timeline-by">Updated by: {{ update.updated_by }}</div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Get updates section -->
+            <h3 style="font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--purple-900);margin-bottom:1rem;padding-bottom:0.5rem;border-bottom:2px solid var(--gray-200);">Stay Updated</h3>
+            <p style="font-size:0.875rem;color:var(--gray-600);margin-bottom:1rem;">Receive real-time updates through one of these channels:</p>
+            <div class="contact-grid">
+                <a href="https://wa.me/27101234567?text=Complaint reference: {{ complaint.reference_number }}" class="contact-option" target="_blank">
+                    <div class="contact-icon">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    </div>
+                    <div class="contact-label">WhatsApp</div>
+                    <div class="contact-sub">+27 10 123 4567</div>
+                </a>
+                <a href="tel:0800601709" class="contact-option">
+                    <div class="contact-icon">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.6 3.38 2 2 0 0 1 3.58 1h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 8.96a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 15.92z"/></svg>
+                    </div>
+                    <div class="contact-label">Helpline</div>
+                    <div class="contact-sub">0800 601 709 (Free)</div>
+                </a>
+                <a href="mailto:help@citizenfirst.gov.za?subject=Complaint {{ complaint.reference_number }}" class="contact-option">
+                    <div class="contact-icon">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                    </div>
+                    <div class="contact-label">Email</div>
+                    <div class="contact-sub">help@citizenfirst.gov.za</div>
+                </a>
+            </div>
+
+            <!-- Rating -->
+            {% if complaint.status in 'resolved,closed' %}
+            <div class="rating-section">
+                <h3 class="rating-title">Rate This Service</h3>
+                <p class="rating-sub">Your complaint has been {{ complaint.get_status_display|lower }}. How would you rate the service you received?</p>
+                {% if complaint.rating %}
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <div style="display:flex;gap:4px;">
+                        {% for i in "12345" %}
+                        <span style="font-size:1.8rem;color:{% if forloop.counter <= complaint.rating.stars %}var(--gold){% else %}var(--gray-200){% endif %};">&#9733;</span>
+                        {% endfor %}
+                    </div>
+                    <span style="font-size:0.875rem;color:var(--gray-600);">Rated {{ complaint.rating.stars }}/5 stars. Thank you for your feedback.</span>
+                </div>
+                {% if complaint.rating.comment %}
+                <p style="font-size:0.875rem;color:var(--gray-600);margin-top:8px;font-style:italic;">"{{ complaint.rating.comment }}"</p>
+                {% endif %}
+                {% else %}
+                <form method="post" action="{% url 'submit_rating' %}" id="ratingForm">
+                    {% csrf_token %}
+                    <input type="hidden" name="reference_number" value="{{ complaint.reference_number }}">
+                    <div class="star-rating" style="margin-bottom:1rem;">
+                        <input type="radio" name="stars" id="s5" value="5"><label for="s5">&#9733;</label>
+                        <input type="radio" name="stars" id="s4" value="4"><label for="s4">&#9733;</label>
+                        <input type="radio" name="stars" id="s3" value="3"><label for="s3">&#9733;</label>
+                        <input type="radio" name="stars" id="s2" value="2"><label for="s2">&#9733;</label>
+                        <input type="radio" name="stars" id="s1" value="1"><label for="s1">&#9733;</label>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Leave a comment (optional)</label>
+                        <textarea name="comment" class="form-control" rows="3" placeholder="Tell us about your experience with this service..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Submit Rating</button>
+                </form>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Info section when no result -->
+    {% if not complaint and not error %}
+    <div style="background:white;border-radius:var(--radius-xl);box-shadow:var(--shadow-sm);padding:40px;text-align:center;border:1px solid var(--gray-200);">
+        <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="var(--purple-300)" stroke-width="1.5" style="margin-bottom:1rem;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <h3 style="font-family:'Playfair Display',serif;color:var(--purple-900);margin-bottom:0.5rem;">Enter Your Reference Number</h3>
+        <p style="color:var(--gray-400);font-size:0.875rem;max-width:400px;margin:0 auto 1.5rem;">Your reference number was shown on the confirmation page after you submitted your complaint. It looks like <strong>SD-2024-ABC123</strong>.</p>
+        <a href="{% url 'lodge_complaint' %}" class="btn btn-outline">Lodge a New Complaint</a>
+    </div>
+    {% endif %}
+</div>
+
+<!-- CHATBOX -->
+<div class="chatbox-fab">
+    <div style="position:relative;">
+        <button class="chatbox-toggle" id="chatToggle" onclick="toggleChat()">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </button>
+        <span class="chat-badge">?</span>
+    </div>
+    <div class="chatbox-panel" id="chatPanel">
+        <div class="chat-header">
+            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=TrackingAgent&backgroundColor=c0aede" class="chat-agent-avatar" alt="Support Agent">
+            <div class="chat-agent-info">
+                <div class="chat-agent-name">Tracking Support</div>
+                <div class="chat-agent-status"><span class="status-dot"></span> Available 24/7</div>
+            </div>
+            <button class="chat-close" onclick="toggleChat()">&#x2715;</button>
+        </div>
+        <div class="chat-messages" id="chatMessages">
+            <div class="chat-message staff-msg">
+                <div class="msg-bubble">Hello! I can help you understand your complaint status and how to get updates. What would you like to know?</div>
+                <span class="msg-meta">Tracking Support · now</span>
+            </div>
+        </div>
+        <div class="chat-input-area">
+            <textarea class="chat-input" id="chatInput" placeholder="Ask about your complaint..." rows="1" onkeydown="handleChatKey(event)"></textarea>
+            <button class="chat-send" onclick="sendChatMessage()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function toggleChat() {
+    const panel = document.getElementById('chatPanel');
+    panel.classList.toggle('open');
+    if (panel.classList.contains('open')) loadChatMessages();
+}
+
+function handleChatKey(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendChatMessage();
+    }
+}
+
+function sendChatMessage() {
+    const input = document.getElementById('chatInput');
+    const msg = input.value.trim();
+    if (!msg) return;
+    input.value = '';
+    appendMessage('You', msg, false);
+
+    fetch('/report/api/chat/', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken')},
+        body: JSON.stringify({message: msg, page: 'track'})
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.messages) {
+            const last = data.messages[data.messages.length - 1];
+            if (last && last.is_staff) appendMessage(last.name, last.message, true);
+        }
+    });
+}
+
+function appendMessage(name, text, isStaff) {
+    const container = document.getElementById('chatMessages');
+    const div = document.createElement('div');
+    div.className = 'chat-message ' + (isStaff ? 'staff-msg' : 'user-msg');
+    div.innerHTML = `<div class="msg-bubble">${text}</div><span class="msg-meta">${name} · now</span>`;
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+}
+
+function loadChatMessages() {
+    fetch('/report/api/chat/?page=track')
+    .then(r => r.json())
+    .then(data => {
+        const container = document.getElementById('chatMessages');
+        container.innerHTML = '';
+        if (!data.messages || data.messages.length === 0) {
+            appendMessage('Tracking Support', 'Hello! I can help you understand your complaint status and how to get updates. What would you like to know?', true);
+        } else {
+            data.messages.forEach(m => appendMessage(m.name, m.message, m.is_staff));
+        }
+    });
+}
+
+function getCookie(name) {
+    let v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+    return v ? v[2] : null;
+}
+</script>
+{% endblock %}

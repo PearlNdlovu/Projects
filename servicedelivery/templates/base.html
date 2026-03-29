@@ -1,0 +1,235 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Service Delivery Portal{% endblock %} | CitizenFirst</title>
+    <link rel="icon" href="{% static 'images/logo.png' %}" type="image/png">
+    <link rel="stylesheet" href="{% static 'css/global.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<!-- ===== NAVIGATION ===== -->
+<nav class="navbar">
+    <a href="{% url 'home' %}" class="navbar-brand">
+         <div class="navbar-brand-text">
+            
+            <span class="navbar-brand-title">CitizenFirst</span>
+            <span class="navbar-brand-sub">Service Delivery Portal</span>
+        </div>
+    </a>
+
+    <ul class="navbar-nav">
+        <li>
+            <a href="{% url 'lodge_complaint' %}" class="nav-btn nav-btn-lodge">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+                Lodge a Complaint
+            </a>
+        </li>
+        <li>
+            {% if user.is_authenticated %}
+                <div class="nav-dropdown">
+                    <button class="nav-btn nav-btn-login" onclick="this.parentElement.classList.toggle('open')">
+                        <div class="nav-user-avatar">{{ user.first_name|first|upper }}{{ user.last_name|first|upper }}</div>
+                        {{ user.first_name|default:user.username }}
+                    </button>
+                    <div class="nav-dropdown-menu">
+                        <span class="dropdown-label">My Account</span>
+                        {% if user.is_staff %}
+                        <a href="/admin/" class="dropdown-item">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                            Admin Dashboard
+                        </a>
+                        {% endif %}
+                        <a href="{% url 'track_complaint' %}" class="dropdown-item">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            Track My Complaints
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a href="{% url 'logout' %}" class="dropdown-item">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                            Sign Out
+                        </a>
+                    </div>
+                </div>
+            {% else %}
+                <a href="{% url 'home' %}#auth" class="nav-btn nav-btn-login">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+                    Login / Sign Up
+                </a>
+            {% endif %}
+        </li>
+        <li>
+            <div class="nav-dropdown">
+                <button class="nav-btn nav-btn-outline" onclick="this.parentElement.classList.toggle('open')">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    Help
+                </button>
+                <div class="nav-dropdown-menu">
+                    <span class="dropdown-label">Language</span>
+                    <button class="dropdown-item" onclick="setLanguage('en')">
+                        <span style="font-size:1.1em;">🇿🇦</span> English
+                    </button>
+                    <button class="dropdown-item" onclick="setLanguage('zu')">
+                        <span style="font-size:1.1em;">🇿🇦</span> isiZulu
+                    </button>
+                    <button class="dropdown-item" onclick="setLanguage('xh')">
+                        <span style="font-size:1.1em;">🇿🇦</span> isiXhosa
+                    </button>
+                    <button class="dropdown-item" onclick="setLanguage('af')">
+                        <span style="font-size:1.1em;">🇿🇦</span> Afrikaans
+                    </button>
+                    <button class="dropdown-item" onclick="setLanguage('st')">
+                        <span style="font-size:1.1em;">🇿🇦</span> Sesotho
+                    </button>
+                    <div class="dropdown-divider"></div>
+                    <span class="dropdown-label">Support</span>
+                    <a href="{% url 'track_complaint' %}" class="dropdown-item">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        Track a Complaint
+                    </a>
+                    <a href="tel:0800601709" class="dropdown-item">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.6 3.38 2 2 0 0 1 3.58 1h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 8.96a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 15.92z"/></svg>
+                        0800 601 709 (Free)
+                    </a>
+                </div>
+            </div>
+        </li>
+    </ul>
+</nav>
+
+<!-- ===== MESSAGES ===== -->
+{% if messages %}
+<div class="messages-container" id="messagesContainer">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags|default:'info' }}">
+        {% if message.tags == 'success' %}
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        {% elif message.tags == 'error' %}
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        {% else %}
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        {% endif %}
+        <span>{{ message }}</span>
+        <button class="alert-close" onclick="this.parentElement.remove()">&#x2715;</button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- ===== PAGE CONTENT ===== -->
+{% block content %}{% endblock %}
+
+<!-- ===== FOOTER ===== -->
+<footer>
+    <div class="footer-grid">
+        <div>
+            <img src="{% static 'images/logo.png' %}" alt="CitizenFirst" class="footer-brand-logo">
+            <h3 style="font-family:'Playfair Display',serif; color:white; font-size:1.3rem;">CitizenFirst</h3>
+            <p class="footer-tagline">
+                A service delivery complaint portal built to connect South African citizens with their municipalities for faster, more transparent resolutions.
+            </p>
+            <div style="margin-top:1.5rem; display:flex; gap:10px;">
+                <a href="#" style="width:36px;height:36px;border-radius:50%;background:rgba(155,95,224,0.2);display:flex;align-items:center;justify-content:center;color:#c49af0;transition:all 0.3s;" onmouseover="this.style.background='rgba(155,95,224,0.4)'" onmouseout="this.style.background='rgba(155,95,224,0.2)'">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                </a>
+                <a href="#" style="width:36px;height:36px;border-radius:50%;background:rgba(155,95,224,0.2);display:flex;align-items:center;justify-content:center;color:#c49af0;transition:all 0.3s;" onmouseover="this.style.background='rgba(155,95,224,0.4)'" onmouseout="this.style.background='rgba(155,95,224,0.2)'">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/></svg>
+                </a>
+            </div>
+        </div>
+
+        <div>
+            <h4 class="footer-heading">Quick Links</h4>
+            <ul class="footer-links">
+                <li><a href="{% url 'home' %}">Home</a></li>
+                <li><a href="{% url 'lodge_complaint' %}">Lodge a Complaint</a></li>
+                <li><a href="{% url 'track_complaint' %}">Track Complaint</a></li>
+                <li><a href="/admin/">Admin Portal</a></li>
+            </ul>
+        </div>
+
+        <div>
+            <h4 class="footer-heading">Categories</h4>
+            <ul class="footer-links">
+                <li><a href="#">Water &amp; Sanitation</a></li>
+                <li><a href="#">Electricity</a></li>
+                <li><a href="#">Roads &amp; Potholes</a></li>
+                <li><a href="#">Waste Collection</a></li>
+                <li><a href="#">Public Safety</a></li>
+            </ul>
+        </div>
+
+        <div>
+            <h4 class="footer-heading">Contact Us</h4>
+            <div class="footer-contact-item">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.6 3.38 2 2 0 0 1 3.58 1h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 8.96a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 15.92z"/></svg>
+                <span>0800 601 709 (Toll-free)</span>
+            </div>
+            <div class="footer-contact-item">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                <span>WhatsApp: +27 10 123 4567</span>
+            </div>
+            <div class="footer-contact-item">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                <span>help@citizenfirst.gov.za</span>
+            </div>
+            <div class="footer-contact-item">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <span>Mon–Fri: 07:00 – 17:00</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer-bottom">
+        <span>&copy; 2024 CitizenFirst Service Delivery Portal. All rights reserved.</span>
+        <span>Built for South African citizens. Powered by Django.</span>
+        <div style="display:flex; gap:1rem;">
+            <a href="#" style="color:var(--gray-400);">Privacy Policy</a>
+            <a href="#" style="color:var(--gray-400);">Terms of Use</a>
+            <a href="#" style="color:var(--gray-400);">Accessibility</a>
+        </div>
+    </div>
+</footer>
+
+<!-- Language modal -->
+<div id="langModal" style="display:none; position:fixed; inset:0; background:rgba(26,10,46,0.6); z-index:3000; align-items:center; justify-content:center;">
+    <div style="background:white; border-radius:16px; padding:2rem; max-width:380px; width:90%; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+        <h3 style="font-family:'Playfair Display',serif; color:var(--purple-800); margin-bottom:0.5rem;">Language Changed</h3>
+        <p style="color:var(--gray-600); margin-bottom:1.5rem; font-size:0.95rem;" id="langModalMsg">Language preference saved.</p>
+        <button onclick="document.getElementById('langModal').style.display='none'" class="btn btn-primary" style="padding:10px 28px;">Continue</button>
+    </div>
+</div>
+
+<script>
+// Auto-dismiss messages after 6 seconds
+setTimeout(() => {
+    document.querySelectorAll('.alert').forEach(a => {
+        a.style.animation = 'slideInRight 0.4s reverse';
+        setTimeout(() => a.remove(), 400);
+    });
+}, 6000);
+
+// Language switcher
+function setLanguage(code) {
+    const names = {en:'English',zu:'isiZulu',xh:'isiXhosa',af:'Afrikaans',st:'Sesotho'};
+    document.getElementById('langModalMsg').textContent = `Your language has been set to ${names[code]}. Full multilingual support coming soon.`;
+    const modal = document.getElementById('langModal');
+    modal.style.display = 'flex';
+    localStorage.setItem('preferredLanguage', code);
+    document.querySelectorAll('.nav-dropdown').forEach(d => d.classList.remove('open'));
+}
+
+// Close dropdowns when clicking outside
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.nav-dropdown')) {
+        document.querySelectorAll('.nav-dropdown').forEach(d => d.classList.remove('open'));
+    }
+});
+</script>
+
+{% block extra_js %}{% endblock %}
+</body>
+</html>
